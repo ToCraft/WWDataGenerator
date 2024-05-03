@@ -1,11 +1,10 @@
-package tocraft.wwdatagen.config;
+package tocraft.wwdatagen.data;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
-import dev.architectury.platform.Platform;
 import tocraft.walkers.api.data.skills.SkillDataManager;
 import tocraft.walkers.api.data.variants.TypeProviderDataManager;
 
@@ -14,11 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static tocraft.wwdatagen.data.DataManager.*;
+
 @SuppressWarnings("unused")
 public final class DataSaver {
-    private static final Path GENERATED_PATH = Paths.get(Platform.getConfigFolder().toString(), "walkers/generated");
-    private static final Path VARIANTS_PATH = Paths.get(GENERATED_PATH.toString(), "data/auto/alkers/variants");
-    private static final Path SKILLS_PATH = Paths.get(GENERATED_PATH.toString(), "data/auto/alkers/skills");
     private static final String PACK_MCMETA = "{\n" +
             "\t\"pack\": {\n" +
             "\t\t\"description\": \"Generated Walkers Datapack\",\n" +
@@ -41,20 +39,6 @@ public final class DataSaver {
         if (!skillList.entityTypeKeys().isEmpty()) fileName += "_" + skillList.entityTypeKeys().get(0).getPath();
         if (!skillList.entityTagKeys().isEmpty()) fileName += "_" + skillList.entityTagKeys().get(0).getPath();
         write(Paths.get(SKILLS_PATH.toString(), fileName + ".json"), json);
-    }
-
-    private static void createDirectories() throws IOException {
-        if (!Files.exists(GENERATED_PATH)) {
-            Files.createDirectories(GENERATED_PATH);
-        }
-
-        if (!Files.exists(VARIANTS_PATH)) {
-            Files.createDirectories(VARIANTS_PATH);
-        }
-
-        if (!Files.exists(SKILLS_PATH)) {
-            Files.createDirectories(SKILLS_PATH);
-        }
     }
 
     private static void write(Path file, JsonElement json) {

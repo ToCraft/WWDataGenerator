@@ -2,10 +2,13 @@ package tocraft.wwdatagen;
 
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import tocraft.craftedcore.config.ConfigLoader;
-import tocraft.wwdatagen.config.DataSaver;
 import tocraft.wwdatagen.config.NBTStripper;
+import tocraft.wwdatagen.data.DataSaver;
+
+import java.util.List;
 
 public class WWDataGen {
     public static final String MODID = "wwdatagen";
@@ -29,5 +32,19 @@ public class WWDataGen {
     @SuppressWarnings("unsued")
     public static ResourceLocation id(String name) {
         return new ResourceLocation(MODID, name);
+    }
+
+    public static void stripNBT(CompoundTag nbt) {
+        for (String s : NBT_STRIPPER.generic) {
+            nbt.remove(s);
+        }
+
+        if (nbt.contains("id")) {
+            List<String> specific = NBT_STRIPPER.specific.get(nbt.getString("id"));
+            for (String s : specific) {
+                nbt.remove(s);
+            }
+        }
+
     }
 }

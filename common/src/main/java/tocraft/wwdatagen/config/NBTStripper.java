@@ -11,7 +11,6 @@ public final class NBTStripper implements Config {
     public static final String NAME = "NBTStripper";
     public List<String> generic = new ArrayList<>() {
         {
-            add("Age");
             add("FallDistance");
             add("DeathTime");
             add("Attributes");
@@ -41,6 +40,8 @@ public final class NBTStripper implements Config {
             add("Health");
             add("LeftHanded");
             add("CustomName");
+            add("InLove");
+            add("CanBreakDoors");
         }
     };
     public Map<String, List<String>> specific = new HashMap<>() {
