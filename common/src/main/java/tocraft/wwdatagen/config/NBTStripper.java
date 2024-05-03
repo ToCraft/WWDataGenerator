@@ -1,6 +1,9 @@
 package tocraft.wwdatagen.config;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import tocraft.craftedcore.config.Config;
+import tocraft.wwdatagen.WWDataGen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,13 +45,40 @@ public final class NBTStripper implements Config {
             add("CustomName");
             add("InLove");
             add("CanBreakDoors");
+            add("InWaterTime");
+            add("AngerTime");
+            add("DrownedConversionTime");
+            add("StrayConversionTime");
+            add("IsBaby");
+            add("ForcedAge");
+            add("Age");
+            add("FromBucket");
         }
     };
     public Map<String, List<String>> specific = new HashMap<>() {
         {
             put("minecraft:wolf", List.of("isSpecial"));
+            put("minecraft:bat", List.of("BatFlags"));
+            put("minecraft:chicken", List.of("IsChickenJockey", "EggLayTime"));
+            put("minecraft:creeper", List.of("Fuse", "ignited", "ExplosionRadius"));
+            put("minecraft:dolphin", List.of("TreasurePosZ", "TreasurePosY", "TreasurePosX", "Moistness", "GotFish"));
+            put("minecraft:glow_squid", List.of("DarkTicksRemaining"));
+            put("minecraft:pig", List.of("Saddle"));
         }
     };
+
+    public static void stripNBT(ResourceLocation entityType, CompoundTag nbt) {
+        for (String s : WWDataGen.NBT_STRIPPER.generic) {
+            nbt.remove(s);
+        }
+
+        if (WWDataGen.NBT_STRIPPER.specific.containsKey(entityType.toString())) {
+            List<String> specific = WWDataGen.NBT_STRIPPER.specific.get(entityType.toString());
+            for (String s : specific) {
+                nbt.remove(s);
+            }
+        }
+    }
 
     @Override
     public String getName() {

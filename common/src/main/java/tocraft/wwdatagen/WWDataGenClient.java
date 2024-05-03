@@ -17,6 +17,7 @@ import tocraft.walkers.api.variant.TypeProviderRegistry;
 import tocraft.walkers.skills.SkillRegistry;
 import tocraft.walkers.skills.impl.HumanoidSkill;
 import tocraft.wwdatagen.data.DataSaver;
+import tocraft.wwdatagen.util.TypeProviderHelper;
 
 @Environment(EnvType.CLIENT)
 public class WWDataGenClient {
@@ -40,7 +41,7 @@ public class WWDataGenClient {
                     if (!TypeProviderRegistry.hasProvider((EntityType<? extends LivingEntity>) entity.getType())) {
                         CompoundTag nbt = new CompoundTag();
                         entity.save(nbt);
-                        TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = WWDataGen.generateFromNBT(world, entity.getType(), nbt);
+                        TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = TypeProviderHelper.generateFromNBT(world, entity.getType(), nbt);
                         if (typeProviderEntry != null) {
                             DataSaver.save(typeProviderEntry);
                         }
