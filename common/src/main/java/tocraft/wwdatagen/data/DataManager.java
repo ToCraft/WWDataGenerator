@@ -11,8 +11,9 @@ import java.nio.file.Paths;
 @SuppressWarnings("unused")
 public final class DataManager {
     public static final Path GENERATED_PATH = Paths.get(Platform.getConfigFolder().toString(), "walkers/generated");
-    public static final Path VARIANTS_PATH = Paths.get(GENERATED_PATH.toString(), "data/auto/alkers/variants");
-    public static final Path SKILLS_PATH = Paths.get(GENERATED_PATH.toString(), "data/auto/alkers/skills");
+    public static final Path DATA_PATH = Paths.get(GENERATED_PATH.toString(), "data/auto/walkers");
+    public static final Path VARIANTS_PATH = Paths.get(DATA_PATH.toString(), "variants");
+    public static final Path SKILLS_PATH = Paths.get(DATA_PATH.toString(), "skills");
 
     public static Path getGeneratedTypeProviderPath(ResourceLocation entityType) {
         return Paths.get(VARIANTS_PATH.toString(), entityType.getNamespace() + "_" + entityType.getPath() + ".json");
@@ -21,6 +22,10 @@ public final class DataManager {
     static void createDirectories() throws IOException {
         if (!Files.exists(GENERATED_PATH)) {
             Files.createDirectories(GENERATED_PATH);
+        }
+
+        if (!Files.exists(DATA_PATH)) {
+            Files.createDirectories(DATA_PATH);
         }
 
         if (!Files.exists(VARIANTS_PATH)) {

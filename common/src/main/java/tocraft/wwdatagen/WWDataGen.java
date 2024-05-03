@@ -49,9 +49,7 @@ public class WWDataGen {
                     }
                 }
             }
-        });
 
-        LifecycleEvent.SERVER_LEVEL_LOAD.register(world -> {
             if (CONFIG.autoLoadData) {
                 for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
                     TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = DataLoader.loadGeneratedTypeProvider(EntityType.getKey(entityType));

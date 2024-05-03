@@ -47,16 +47,18 @@ public final class DataSaver {
     }
 
     private static void write(Path file, String content) {
-        try {
-            createDirectories();
+        if (content != null && !content.isBlank()) {
+            try {
+                createDirectories();
 
-            if (!Files.exists(file)) {
-                Files.createFile(file);
+                if (!Files.exists(file)) {
+                    Files.createFile(file);
+                }
+
+                Files.writeString(file, content);
+            } catch (IOException e) {
+                LogUtils.getLogger().error("Couldn't save config at {}. {}", file.toAbsolutePath(), e);
             }
-
-            Files.writeString(file, content);
-        } catch (IOException e) {
-            LogUtils.getLogger().error("Couldn't save config at {}. {}", file.toAbsolutePath(), e);
         }
     }
 }
