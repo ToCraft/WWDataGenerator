@@ -6,7 +6,7 @@ license = "MIT"
 [[mods]]
 modId = "wwdatagen"
 version = "${version}"
-displayName = "ReMorphed"
+displayName = "WWDataGenerator"
 authors = "To_Craft"
 description = '''
 Companion mod for the woodwalkers-mod, to help datapack creators, create awsome datapacks!

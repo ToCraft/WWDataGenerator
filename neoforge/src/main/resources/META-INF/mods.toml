@@ -4,12 +4,12 @@ loaderVersion = "[1,)"
 license = "MIT"
 
 [[mixins]]
-config = "remorphed.mixins.json"
+config = "wwdatagen.mixins.json"
 
 [[mods]]
 modId = "wwdatagen"
 version = "${version}"
-displayName = "ReMorphed"
+displayName = "WWDataGenerator"
 authors = "To_Craft"
 description = '''
 Companion mod for the woodwalkers-mod, to help datapack creators, create awsome datapacks!

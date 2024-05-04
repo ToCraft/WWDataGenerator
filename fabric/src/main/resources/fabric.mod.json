@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "remorphed",
+  "id": "wwdatagen",
   "version": "${version}",
-  "name": "ReMorphed",
-  "description": "Play as your favorite entities!",
+  "name": "WWDataGenerator",
+  "description": "Companion mod for the woodwalkers-mod, to help datapack creators, create awsome datapacks! (Please consider sending your datapcks to me so other players can enjoy the enhanced gameplay :D )",
   "authors": [
     "To_Craft"
   ],

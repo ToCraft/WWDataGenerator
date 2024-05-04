@@ -21,10 +21,10 @@ body:
     validations:
       required: true
   - type: input
-    id: remorphed-version
+    id: wwdatagen-version
     attributes:
-      label: Remorphed version
-      placeholder: e.g. 2.1
+      label: WWDataGenerator version
+      placeholder: e.g. 1.0
     validations:
       required: true
   - type: input

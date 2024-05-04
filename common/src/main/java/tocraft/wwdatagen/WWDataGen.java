@@ -1,6 +1,5 @@
 package tocraft.wwdatagen;
 
-import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
@@ -20,7 +19,6 @@ import tocraft.wwdatagen.config.NBTStripper;
 import tocraft.wwdatagen.config.WWDataGenConfig;
 import tocraft.wwdatagen.data.DataLoader;
 import tocraft.wwdatagen.data.DataSaver;
-import tocraft.wwdatagen.listener.EntityListener;
 
 public class WWDataGen {
     public static final String MODID = "wwdatagen";
@@ -37,8 +35,6 @@ public class WWDataGen {
         }
         NBT_STRIPPER.specific.putAll(normalNBTStripper.specific);
         NBT_STRIPPER.save();
-
-        EntityEvent.ADD.register(EntityListener::onCreation);
 
         LifecycleEvent.SERVER_LEVEL_LOAD.register(world -> {
             if (CONFIG.autoLoadData) {

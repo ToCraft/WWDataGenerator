@@ -1,6 +1,5 @@
 package tocraft.wwdatagen.listener;
 
-import dev.architectury.event.EventResult;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -13,7 +12,7 @@ import tocraft.wwdatagen.util.TypeProviderHelper;
 
 public class EntityListener {
     @SuppressWarnings("unchecked")
-    public static EventResult onCreation(Entity entity, Level world) {
+    public static void createData(Entity entity, Level world) {
         if (entity instanceof LivingEntity) {
             if (!TypeProviderRegistry.hasProvider((EntityType<? extends LivingEntity>) entity.getType())) {
                 CompoundTag nbt = new CompoundTag();
@@ -24,7 +23,5 @@ public class EntityListener {
                 }
             }
         }
-
-        return EventResult.pass();
     }
 }
