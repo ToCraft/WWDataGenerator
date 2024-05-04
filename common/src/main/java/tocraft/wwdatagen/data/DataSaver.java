@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static tocraft.wwdatagen.data.DataManager.*;
 
@@ -36,8 +37,8 @@ public final class DataSaver {
     public static void save(SkillDataManager.SkillList skillList) {
         JsonElement json = SkillDataManager.SKILL_LIST_CODEC.encodeStart(JsonOps.INSTANCE, skillList).get().orThrow();
         String fileName = skillList.requiredMod();
-        if (!skillList.entityTypeKeys().isEmpty()) fileName += "_" + skillList.entityTypeKeys().get(0).getPath();
-        if (!skillList.entityTagKeys().isEmpty()) fileName += "_" + skillList.entityTagKeys().get(0).getPath();
+        if (!skillList.entityTypeKeys().isEmpty()) fileName += (!Objects.equals(fileName, "") ? "_" : "") + skillList.entityTypeKeys().get(0).toString().replaceAll(":", "_");
+        if (!skillList.entityTagKeys().isEmpty()) fileName += (!Objects.equals(fileName, "") ? "_" : "") + skillList.entityTagKeys().get(0).toString().replaceAll(":", "_");
         write(Paths.get(SKILLS_PATH.toString(), fileName + ".json"), json);
     }
 

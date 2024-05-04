@@ -11,7 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import tocraft.walkers.Walkers;
+import tocraft.walkers.api.data.skills.SkillDataManager;
 import tocraft.walkers.api.data.variants.TypeProviderDataManager;
 import tocraft.walkers.api.variant.TypeProviderRegistry;
 import tocraft.walkers.skills.SkillRegistry;
@@ -19,18 +19,21 @@ import tocraft.walkers.skills.impl.HumanoidSkill;
 import tocraft.wwdatagen.data.DataSaver;
 import tocraft.wwdatagen.util.TypeProviderHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Environment(EnvType.CLIENT)
 public class WWDataGenClient {
     @SuppressWarnings("unchecked")
     public void initialize() {
         ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
+            // scan for humanoid skill
             for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
                 Entity entity = entityType.create(world);
-                if (entity instanceof LivingEntity && SkillRegistry.has((LivingEntity) entity, HumanoidSkill.ID)) {
+                if (entity instanceof LivingEntity && !SkillRegistry.has((LivingEntity) entity, HumanoidSkill.ID)) {
                     EntityRenderer<?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
                     if (renderer instanceof HumanoidMobRenderer<?, ?>) {
-                        // TODO: add humanoid skill for entity type
-                        Walkers.LOGGER.info(EntityType.getKey(entityType) + " should have the HumanoidSkill.");
+                        DataSaver.save(new SkillDataManager.SkillList("", List.of(EntityType.getKey(entityType)), new ArrayList<>(), List.of(new HumanoidSkill<>())));
                     }
                 }
             }

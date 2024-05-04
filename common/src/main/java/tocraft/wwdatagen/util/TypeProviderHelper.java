@@ -2,7 +2,6 @@ package tocraft.wwdatagen.util;
 
 import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -14,9 +13,9 @@ import tocraft.walkers.api.variant.TypeProvider;
 import tocraft.wwdatagen.config.NBTStripper;
 import tocraft.wwdatagen.data.DataLoader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
 
 public class TypeProviderHelper {
     @SuppressWarnings("unchecked")
@@ -26,59 +25,33 @@ public class TypeProviderHelper {
         NBTStripper.stripNBT(EntityType.getKey(entityType), nbt);
 
         if (!nbt.getAllKeys().isEmpty()) {
-            Map<Integer, Map<String, AdvancedNBTEntries.AdvancedNBT>> variantData = new HashMap<>();
+            List<CompoundTag> variantData = new ArrayList<>();
 
             TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = DataLoader.loadGeneratedTypeProvider(EntityType.getKey(entityType));
             if (typeProviderEntry != null) {
-                // TODO: Merge type providers by checking each variant and moving it into a new type provider
                 for (int i = 0; i <= typeProviderEntry.typeProvider().getRange(); i++) {
                     // if possible, generate every possible variant and gain NBT from them
                     CompoundTag tag = new CompoundTag();
                     ((TypeProvider<LivingEntity>) typeProviderEntry.typeProvider()).create((EntityType<LivingEntity>) entityType, level, i).save(tag);
                     NBTStripper.stripNBT(EntityType.getKey(entityType), tag);
 
-                    Map<String, AdvancedNBTEntries.AdvancedNBT> data = new HashMap<>() {
-                        {
-                            // TODO: add everything that's still in the "tag" in this map
-                            for (String key : tag.getAllKeys()) {
-                                switch (tag.getTagType(key)) {
-                                    case Tag.TAG_STRING ->
-                                            put(key, new AdvancedNBTEntries.AdvancedNBT("STRING", tag.getString(key)));
-                                    case Tag.TAG_INT ->
-                                            put(key, new AdvancedNBTEntries.AdvancedNBT("INTEGER", tag.getInt(key)));
-                                    default ->
-                                            put(key, new AdvancedNBTEntries.AdvancedNBT("BOOLEAN", tag.getBoolean(key)));
-                                }
-                            }
-                        }
-                    };
+                    CompoundTag data = new CompoundTag();
+                    for (String key : tag.getAllKeys()) {
+                        data.put(key, tag.get(key));
+                    }
 
                     if (canPutInVariantData(variantData, data)) {
-                        variantData.put(i, data);
+                        variantData.add(i, data);
                     }
                 }
             }
-            Map<String, AdvancedNBTEntries.AdvancedNBT> data = new HashMap<>() {
-                {
-                    // TODO: add everything that's still in the "tag" in this map
-                    for (String key : nbt.getAllKeys()) {
-                        switch (nbt.getTagType(key)) {
-                            case Tag.TAG_STRING ->
-                                    put(key, new AdvancedNBTEntries.AdvancedNBT("STRING", nbt.getString(key)));
-                            case Tag.TAG_INT ->
-                                    put(key, new AdvancedNBTEntries.AdvancedNBT("INTEGER", nbt.getInt(key)));
-                            default -> put(key, new AdvancedNBTEntries.AdvancedNBT("BOOLEAN", nbt.getBoolean(key)));
-                        }
-                    }
-                }
-            };
+            CompoundTag data = new CompoundTag();
+            for (String key : nbt.getAllKeys()) {
+                data.put(key, nbt.get(key));
+            }
+
             if (canPutInVariantData(variantData, data)) {
-                // the highest registered value
-                int i = 0;
-                for (Integer key : variantData.keySet()) {
-                    if (key > i) i = key;
-                }
-                variantData.put(i + 1, data);
+                variantData.add(variantData.size(), data);
             }
 
             if (!variantData.isEmpty()) {
@@ -91,16 +64,15 @@ public class TypeProviderHelper {
         return null;
     }
 
-    private static boolean canPutInVariantData(Map<Integer, Map<String, AdvancedNBTEntries.AdvancedNBT>> variantData, Map<String, AdvancedNBTEntries.AdvancedNBT> nbtData) {
-        return !nbtData.isEmpty() && variantData.values().stream().noneMatch(entry -> {
-            boolean bool = true;
-            for (Map.Entry<String, AdvancedNBTEntries.AdvancedNBT> dataEntry : nbtData.entrySet()) {
-                bool = entry.containsKey(dataEntry.getKey()) && Objects.equals(entry.get(dataEntry.getKey()).value(), dataEntry.getValue().value());
-                if (!bool) {
-                    break;
+    private static boolean canPutInVariantData(List<CompoundTag> variantData, CompoundTag nbtData) {
+        return !nbtData.isEmpty() && variantData.stream().noneMatch(entry -> {
+            int matches = 0;
+            for (String key : nbtData.getAllKeys()) {
+                if (entry.contains(key) && entry.get(key) == nbtData.get(key)) {
+                    matches++;
                 }
             }
-            return bool;
+            return matches < nbtData.getAllKeys().size();
         });
     }
 }
