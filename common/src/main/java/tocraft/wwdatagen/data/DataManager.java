@@ -19,6 +19,10 @@ public final class DataManager {
         return Paths.get(VARIANTS_PATH.toString(), entityType.getNamespace() + "_" + entityType.getPath() + ".json");
     }
 
+    public static Path getGeneratedSkillListPath(ResourceLocation entityType) {
+        return Paths.get(VARIANTS_PATH.toString(), entityType.getNamespace() + "_" + entityType.getPath() + ".json");
+    }
+
     static void createDirectories() throws IOException {
         if (!Files.exists(GENERATED_PATH)) {
             Files.createDirectories(GENERATED_PATH);

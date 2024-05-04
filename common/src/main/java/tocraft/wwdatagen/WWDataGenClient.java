@@ -1,6 +1,9 @@
 package tocraft.wwdatagen;
 
+import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientPlayerEvent;
+import dev.architectury.event.events.common.EntityEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -8,9 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import tocraft.walkers.api.data.skills.SkillDataManager;
 import tocraft.walkers.api.data.variants.TypeProviderDataManager;
 import tocraft.walkers.api.variant.TypeProviderRegistry;
@@ -27,17 +28,6 @@ public class WWDataGenClient {
     @SuppressWarnings("unchecked")
     public void initialize() {
         ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
-            // scan for humanoid skill
-            for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
-                Entity entity = entityType.create(world);
-                if (entity instanceof LivingEntity && !SkillRegistry.has((LivingEntity) entity, HumanoidSkill.ID)) {
-                    EntityRenderer<?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
-                    if (renderer instanceof HumanoidMobRenderer<?, ?>) {
-                        DataSaver.save(new SkillDataManager.SkillList("", List.of(EntityType.getKey(entityType)), new ArrayList<>(), List.of(new HumanoidSkill<>())));
-                    }
-                }
-            }
-
             // trigger scan when saving the level
             for (Entity entity : world.entitiesForRendering()) {
                 if (entity instanceof LivingEntity) {
@@ -47,6 +37,21 @@ public class WWDataGenClient {
                         TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = TypeProviderHelper.generateFromNBT(world, entity.getType(), nbt);
                         if (typeProviderEntry != null) {
                             DataSaver.save(typeProviderEntry);
+                        }
+                    }
+                }
+            }
+        });
+
+        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> {
+            if (Minecraft.getInstance().level != null) {
+                // scan for humanoid skill
+                for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
+                    Entity entity = entityType.create(Minecraft.getInstance().level);
+                    if (entity instanceof Mob && !SkillRegistry.has((LivingEntity) entity, HumanoidSkill.ID)) {
+                        EntityRenderer<?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
+                        if (renderer instanceof HumanoidMobRenderer<?, ?>) {
+                            DataSaver.save(new SkillDataManager.SkillList("", List.of(EntityType.getKey(entityType)), new ArrayList<>(), List.of(new HumanoidSkill<>())));
                         }
                     }
                 }

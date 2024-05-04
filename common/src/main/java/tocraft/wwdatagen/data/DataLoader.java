@@ -10,6 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import tocraft.walkers.Walkers;
+import tocraft.walkers.api.data.skills.SkillDataManager;
 import tocraft.walkers.api.data.variants.TypeProviderDataManager;
 
 import java.io.BufferedReader;
@@ -18,7 +19,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 import static tocraft.wwdatagen.data.DataManager.createDirectories;
 
@@ -35,6 +35,22 @@ public final class DataLoader {
                 Walkers.LOGGER.warn(String.format(typeProviderEntryStringEither.right().get(), path));
             } else if (typeProviderEntryStringEither.left().isPresent()) {
                 return typeProviderEntryStringEither.left().get();
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static SkillDataManager.SkillList loadGeneratedSkillList(ResourceLocation entityType) {
+        for (Path path : DataManager.SKILLS_PATH) {
+            if (path.endsWith(".json")) {
+                JsonElement json = readJson(path);
+                if (json != null && !json.isJsonNull()) {
+                    SkillDataManager.SkillList skillList = Util.getOrThrow(SkillDataManager.SKILL_LIST_CODEC.parse(JsonOps.INSTANCE, json), JsonParseException::new);
+                    if (skillList.entityTypeKeys().contains(entityType)) {
+                        return skillList;
+                    }
+                }
             }
         }
         return null;
