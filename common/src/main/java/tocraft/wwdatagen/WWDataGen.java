@@ -1,23 +1,26 @@
 package tocraft.wwdatagen;
 
+import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import tocraft.craftedcore.config.ConfigLoader;
+import tocraft.walkers.api.data.skills.SkillDataManager;
 import tocraft.walkers.api.data.variants.TypeProviderDataManager;
 import tocraft.walkers.api.variant.TypeProvider;
 import tocraft.walkers.api.variant.TypeProviderRegistry;
+import tocraft.walkers.skills.ShapeSkill;
+import tocraft.walkers.skills.SkillRegistry;
 import tocraft.wwdatagen.config.NBTStripper;
 import tocraft.wwdatagen.config.WWDataGenConfig;
 import tocraft.wwdatagen.data.DataLoader;
 import tocraft.wwdatagen.data.DataSaver;
-import tocraft.wwdatagen.util.TypeProviderHelper;
+import tocraft.wwdatagen.listener.EntityListener;
 
 public class WWDataGen {
     public static final String MODID = "wwdatagen";
@@ -35,26 +38,26 @@ public class WWDataGen {
         NBT_STRIPPER.specific.putAll(normalNBTStripper.specific);
         NBT_STRIPPER.save();
 
-        // trigger scan when saving the level
-        LifecycleEvent.SERVER_LEVEL_SAVE.register(world -> {
-            for (Entity entity : world.getAllEntities()) {
-                if (entity instanceof LivingEntity) {
-                    if (!TypeProviderRegistry.hasProvider((EntityType<? extends LivingEntity>) entity.getType())) {
-                        CompoundTag nbt = new CompoundTag();
-                        entity.save(nbt);
-                        TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = TypeProviderHelper.generateFromNBT(world, entity.getType(), nbt);
-                        if (typeProviderEntry != null) {
-                            DataSaver.save(typeProviderEntry);
-                        }
-                    }
-                }
-            }
+        EntityEvent.ADD.register(EntityListener::onCreation);
 
+        LifecycleEvent.SERVER_LEVEL_LOAD.register(world -> {
             if (CONFIG.autoLoadData) {
                 for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
+                    // load type provider
                     TypeProviderDataManager.TypeProviderEntry<?> typeProviderEntry = DataLoader.loadGeneratedTypeProvider(EntityType.getKey(entityType));
                     if (typeProviderEntry != null && (typeProviderEntry.requiredMod() == null || typeProviderEntry.requiredMod().isBlank() || Platform.isModLoaded(typeProviderEntry.requiredMod()))) {
                         TypeProviderRegistry.register((EntityType<LivingEntity>) entityType, (TypeProvider<LivingEntity>) typeProviderEntry.typeProvider());
+                    }
+
+                    // load skills
+                    SkillDataManager.SkillList skillList = DataLoader.loadGeneratedSkillList(EntityType.getKey(entityType));
+                    if (skillList != null && (skillList.requiredMod() == null || skillList.requiredMod().isBlank() || Platform.isModLoaded(skillList.requiredMod()))) {
+                        for (EntityType<LivingEntity> type : skillList.entityTypes()) {
+                            SkillRegistry.registerByType(type, skillList.skillList().stream().map(skill -> (ShapeSkill<LivingEntity>) skill).toList());
+                        }
+                        for (TagKey<EntityType<?>> entityTag : skillList.entityTags()) {
+                            SkillRegistry.registerByTag(entityTag, skillList.skillList().stream().map(skill -> (ShapeSkill<LivingEntity>) skill).toList());
+                        }
                     }
                 }
             }
@@ -64,7 +67,7 @@ public class WWDataGen {
         DataSaver.initialize();
     }
 
-    @SuppressWarnings("unsued")
+    @SuppressWarnings("unused")
     public static ResourceLocation id(String name) {
         return new ResourceLocation(MODID, name);
     }

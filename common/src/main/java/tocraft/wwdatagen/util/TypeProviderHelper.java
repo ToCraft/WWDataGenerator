@@ -16,6 +16,7 @@ import tocraft.wwdatagen.data.DataLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class TypeProviderHelper {
     @SuppressWarnings("unchecked")
@@ -65,14 +66,33 @@ public class TypeProviderHelper {
     }
 
     private static boolean canPutInVariantData(List<CompoundTag> variantData, CompoundTag nbtData) {
-        return !nbtData.isEmpty() && variantData.stream().noneMatch(entry -> {
-            int matches = 0;
-            for (String key : nbtData.getAllKeys()) {
-                if (entry.contains(key) && entry.get(key) == nbtData.get(key)) {
-                    matches++;
+        for (CompoundTag data : variantData) {
+            if (tagsAreEqual(data, nbtData)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Why did I create this???
+     */
+    private static boolean tagsAreEqual(CompoundTag a, CompoundTag b) {
+        boolean bool = Objects.equals(a, b) || a.getAsString().equals(b.getAsString());
+        if (!bool && a.getAllKeys().containsAll(b.getAllKeys())) {
+            for (String key : b.getAllKeys()) {
+                if (Objects.equals(a.get(key), b.get(key))) {
+                    return false;
                 }
             }
-            return matches < nbtData.getAllKeys().size();
-        });
+        }
+        if (!bool && b.getAllKeys().containsAll(a.getAllKeys())) {
+            for (String key : a.getAllKeys()) {
+                if (Objects.equals(b.get(key), a.get(key))) {
+                    return false;
+                }
+            }
+        }
+        return bool;
     }
 }
